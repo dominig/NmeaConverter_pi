@@ -3,6 +3,10 @@
 # ---------------------------------------------------------------------------
 
 set(CMLOC "CMakeLists: ")
+# This option is only usefull for debuging cmake process
+option (CMAKE_VERBOSE_MAKEFILE "activate extra debug to list each cmake step" OFF)
+
+# define minimum cmake version
 
 cmake_minimum_required(VERSION 3.1.1)
 if(COMMAND cmake_policy)
@@ -62,6 +66,8 @@ set(XML_DESCRIPTION "NmeaConverter is a plugin where you can manipulate or add n
 option(PLUGIN_USE_SVG "Use SVG graphics" ON)
 
 set(CMAKE_CXX_STANDARD 11)
+option(USE_RPMBUILD "Build out of git tree as required by OBS (OpenSUSE) or Koji (Fedora, Centos, RedPesk)" OFF)
+
 
 # Use local version of GLU library
 set(USE_LOCAL_GLU TRUE)
@@ -86,7 +92,7 @@ project(${PACKAGE})
 
 include("cmake/PluginSetup.cmake")
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+option(CMAKE_VERBOSE_MAKEFILE ON)
 
 option(Plugin_CXX11 "Use c++11" ON)
 
@@ -143,11 +149,11 @@ set(OCPNHDRS
 # 
 # set(EXTINCLUDE ${EXTINCLUDE} extinclude/clipper.hpp extinclude/pugiconfig.hpp extinclude/pugixml.hpp)
 
-# if(APPLE)
+# if(APPLE OR USE_RPMBUILD)
 #     option(OD_JSON_SCHEMA_VALIDATOR "Use JSON Schema validator" OFF)
-# else(APPLE)
+# else(APPLE OR USE_RPMBUILD)
 #     option(OD_JSON_SCHEMA_VALIDATOR "Use JSON Schema validator" ON)
-# endif(APPLE)
+# endif(APPLE OR USE_RPMBUILD)
 # 
 # if(OD_JSON_SCHEMA_VALIDATOR)
 #     message(STATUS "${CMLOC}Using JSON Schema validation - warning this changes the 'flavour' of the executable and it may not be compatible with OpenCPN")
@@ -246,4 +252,7 @@ endforeach()
 
 include("cmake/PluginInstall.cmake")
 include("cmake/PluginLocalization.cmake")
-include("cmake/PluginPackage.cmake")
+if (NOT USE_RPMBUILD)
+# rpm-build provides its own package creation internal tool
+    include("PluginPackage")
+endif (NOT USE_RPMBUILD)
